@@ -32,6 +32,9 @@ public class MultilevelFeedbackScheduler extends Scheduler {
   public boolean timerInterrupt() {
     Lib.assertTrue(Machine.interrupt().disabled());
 
+    return myQueue.timerInterrupt();
+
+    /*
     //AGE
     //Increment all the threads that aren't being run to keep track of aging. And change the queue levels of things that are really old.
     for(int x = 0; x < RQ1.size(); x++)
@@ -66,7 +69,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       }
     }
 
-    // timerInturrupt puts a flag down to indicate that the thread has been inturrepted. 
+    // timerInterrupt puts a flag down to indicate that the thread has been interrepted. 
 
 
     KThread curThread = KThread.currentThread();
@@ -79,7 +82,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
           //myQueue.getQueue(0).remove(curThread);
           //myQueue.getQueue(1).add(curThread);
           //curThread.schedulingState.setCurrentQueue(1);
-          curThread.schedulingState.setIWasInturrupted(true);
+          curThread.schedulingState.setIWasInterrupted(true);
           curThread.schedulingState.setTimesInterrupted(0);
           return true;
         }
@@ -95,7 +98,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
           //myQueue.getQueue(1).remove(curThread);
           //myQueue.getQueue(2).add(curThread);
           //curThread.schedulingState.setCurrentQueue(2);
-          curThread.schedulingState.setIWasInturrupted(true);
+          curThread.schedulingState.setIWasInterrupted(true);
           curThread.schedulingState.setTimesInterrupted(0);
           return true;
         }
@@ -108,7 +111,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       case 2:
         if(curThread.schedulingState.getTimesInterrupted() >= 7 && !curThread.isBlocked()) //then this is the eighth interrupt
         {
-          curThread.schedulingState.setIWasInturrupted(true);
+          curThread.schedulingState.setIWasInterrupted(true);
           curThread.schedulingState.setTimesInterrupted(0);
           return true;
         }
@@ -120,11 +123,8 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         break;
     }
 
-
-  
-    // TODO
-
     return true;
+  */
   }
 
   /**
@@ -166,7 +166,99 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         return RQ2;
       return null;
     }
+    public boolean timerInterrupt() {
+      Lib.assertTrue(Machine.interrupt().disabled());
 
+      //AGE
+      //Increment all the threads that aren't being run to keep track of aging. And change the queue levels of things that are really old.
+      for(int x = 0; x < RQ1.size(); x++)
+      {
+        KThread thread = RQ1.get(x);
+        if(thread.schedulingState.getWaitingTime() >= 31)
+        {
+          this.getQueue(0).remove(thread);
+          this.getQueue(1).add(thread);
+          thread.schedulingState.setCurrentQueue(0);
+          thread.schedulingState.setWaitingTime((Integer)0);
+        }
+        else
+        {
+          thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
+        }
+      }
+  
+       for(int x = 0; x < RQ2.size(); x++)
+      {
+        KThread thread = RQ2.get(x);
+        if(thread.schedulingState.getWaitingTime() >= 31)
+      {
+          this.getQueue(1).remove(thread);
+          this.getQueue(2).add(thread);
+          thread.schedulingState.setCurrentQueue(1);
+          thread.schedulingState.setWaitingTime(0);
+        }
+        else
+        {
+          thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
+        }
+      }
+  
+      // timerInterrupt puts a flag down to indicate that the thread has been interrepted. 
+
+      KThread curThread = KThread.currentThread();
+      int timesInt = curThread.schedulingState.getTimesInterrupted();
+      switch(curThread.schedulingState.getCurrentQueue())
+      {
+        case 0:
+          if(timesInt >= 1 && !curThread.isBlocked()) //then this is the second interrupt
+          {
+            //myQueue.getQueue(0).remove(curThread);
+            //myQueue.getQueue(1).add(curThread);
+            //curThread.schedulingState.setCurrentQueue(1);
+            curThread.schedulingState.setIWasInterrupted(true);
+            curThread.schedulingState.setTimesInterrupted(0);
+            return true;
+          }
+          else
+          {
+            curThread.schedulingState.setTimesInterrupted(timesInt+1);
+            return false;
+          }
+          break;
+        case 1:
+          if(curThread.schedulingState.getTimesInterrupted() >= 3 && !curThread.isBlocked()) //then this is the fourth interrupt
+          {
+            //myQueue.getQueue(1).remove(curThread);
+            //myQueue.getQueue(2).add(curThread);
+            //curThread.schedulingState.setCurrentQueue(2);
+            curThread.schedulingState.setIWasInterrupted(true);
+            curThread.schedulingState.setTimesInterrupted(0);
+            return true;
+          }
+          else
+          {
+            curThread.schedulingState.setTimesInterrupted(timesInt+1);
+            return false;
+          }
+          break;
+        case 2:
+          if(curThread.schedulingState.getTimesInterrupted() >= 7 && !curThread.isBlocked()) //then this is the eighth interrupt
+          {
+            curThread.schedulingState.setIWasInterrupted(true);
+            curThread.schedulingState.setTimesInterrupted(0);
+            return true;
+          }
+          else
+          {
+            curThread.schedulingState.setTimesInterrupted(timesInt+1);
+            return false;
+          }
+          break;
+      }
+  
+      return true;
+    }
+  
     /**
      * Called when a thread needs to be put into the waiting queue to acquire
      * the resource (in this case, the resource is the CPU).
@@ -195,11 +287,6 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       Integer curQueue = thread.schedulingState.getCurrentQueue();
       switch(curQueue)
       {
-        case null:
-          thread.schedulingState.setCurrentQueue((Integer)0); 
-          System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
-          RQ0.add(thread);
-        break;
         case 0:
             RQ0.add(thread);
             System.out.println("Placed thread " + thread.getName() + " in RQ0");
@@ -214,6 +301,11 @@ public class MultilevelFeedbackScheduler extends Scheduler {
             System.out.println("Placed thread " + thread.getName() + " in RQ0");
             RQ1.add(thread);
         break;
+        default: 
+          thread.schedulingState.setCurrentQueue((Integer)0); 
+          System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
+          RQ0.add(thread);
+          break;
       }
 
       // TODO

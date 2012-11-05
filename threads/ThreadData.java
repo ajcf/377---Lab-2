@@ -1,21 +1,18 @@
 package nachos.threads;
 
-import nachos.machine.Lib;
-import nachos.machine.Machine;
-
 public class ThreadData {
-
 
 	private Integer currentQueue;
 	private int waitingTime;
-	private int timesInterrupted; 
+	private int timesInterrupted;
+	private boolean iWasInterrupted;
 
 	public ThreadData()
 	{
 		currentQueue = null;
-		waitingTime = null;
+		waitingTime = 0;
 		timesInterrupted = 0;
-		iWasInturrupted = false; 
+		iWasInterrupted = false; 
 	}
 
 	public Integer getCurrentQueue()
@@ -33,7 +30,7 @@ public class ThreadData {
 		return waitingTime;
 	}
 
-	public int setWaitingTime(int time)
+	public void setWaitingTime(int time)
 	{
 		waitingTime = time;
 	}
@@ -48,13 +45,13 @@ public class ThreadData {
 		timesInterrupted = timesInt;
 	}
 
-	public boolean getIWasInturrupted()
+	public boolean getIWasInterrupted()
 	{
-		return iWasInturrupted;
+		return iWasInterrupted;
 	}
 
-	public void setIWasInturrupted(boolean wasInter)
+	public void setIWasInterrupted(boolean wasInter)
 	{
-		iWasInturrupted = wasInter;
+		iWasInterrupted = wasInter;
 	}
 }
