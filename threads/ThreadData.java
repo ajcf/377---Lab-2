@@ -1,5 +1,7 @@
 package nachos.threads;
 
+import nachos.machine.Lib;
+import nachos.machine.Machine;
 
 public class ThreadData {
 

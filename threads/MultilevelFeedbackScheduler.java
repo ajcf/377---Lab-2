@@ -1,4 +1,5 @@
 package nachos.threads;
+import nachos.threads.*;
 import java.util.*;
 import nachos.machine.Lib;
 import nachos.machine.Machine;
@@ -9,6 +10,9 @@ import nachos.machine.Machine;
 public class MultilevelFeedbackScheduler extends Scheduler {
 
   MultilevelFeedbackQueue myQueue; 
+  LinkedList<KThread> RQ0;
+  LinkedList<KThread> RQ1;
+  LinkedList<KThread> RQ2;
   /**
    * Initialize a new thread queue for managing access to the CPU using MLFQ.
    */
@@ -35,14 +39,14 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       KThread thread = RQ1.get(x);
       if(thread.schedulingState.getWaitingTime() >= 31)
       {
-        myQueue.getQueue(0).remove(curThread);
-        myQueue.getQueue(1).add(curThread);
+        myQueue.getQueue(0).remove(thread);
+        myQueue.getQueue(1).add(thread);
         thread.schedulingState.setCurrentQueue(0);
-        thread.schedulingState.setWaitingTime(0);
+        thread.schedulingState.setWaitingTime((Integer)0);
       }
       else
       {
-        thread.schedulingState.setWaitingTime(thread.schedulingState.getWaitingTime() + 1 );
+        thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
       }
     }
 
@@ -51,8 +55,8 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       KThread thread = RQ2.get(x);
       if(thread.schedulingState.getWaitingTime() >= 31)
       {
-        myQueue.getQueue(1).remove(curThread);
-        myQueue.getQueue(2).add(curThread);
+        myQueue.getQueue(1).remove(thread);
+        myQueue.getQueue(2).add(thread);
         thread.schedulingState.setCurrentQueue(1);
         thread.schedulingState.setWaitingTime(0);
       }
@@ -152,7 +156,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
 
     }
 
-    public PriorityQueue getQueue(int i)
+    public LinkedList<KThread> getQueue(int i)
     {
       if( i == 0)
         return RQ0;
@@ -172,6 +176,9 @@ public class MultilevelFeedbackScheduler extends Scheduler {
      */
     @Override
     public void waitForAccess(KThread thread) {
+
+
+      System.out.println("Added thread " + thread.getName() + " to ready queue");
       //Will only be called when the thread is coming back from I/O or is just being created. 
 
       Lib.assertTrue(Machine.interrupt().disabled());
@@ -180,6 +187,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       if(thread.schedulingState == null)
       {
         thread.schedulingState = new ThreadData();
+        System.out.println("Created a new threaddata for thread " + thread.getName());
       }
 
       //Add the thread to a queue that is appropreate due to the fact that it is coming back from I/O
@@ -189,17 +197,21 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       {
         case null:
           thread.schedulingState.setCurrentQueue((Integer)0); 
+          System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
           RQ0.add(thread);
         break;
         case 0:
             RQ0.add(thread);
+            System.out.println("Placed thread " + thread.getName() + " in RQ0");
         break;
         case 1:
             thread.schedulingState.setCurrentQueue((Integer)0); 
+            System.out.println("Placed thread " + thread.getName() + " in RQ0");
             RQ0.add(thread);
         break;
         case 2:
             thread.schedulingState.setCurrentQueue((Integer)1);
+            System.out.println("Placed thread " + thread.getName() + " in RQ0");
             RQ1.add(thread);
         break;
       }
@@ -224,11 +236,11 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       }     
       else if(!RQ1.isEmpty())
       {
-        next = RQ1.nextThread();
+        next = RQ1.pop();
       }
       else if(!RQ2.isEmpty())
       {
-        next = RQ2.nextThread();
+        next = RQ2.pop();
       }
      
       if(next != null)
