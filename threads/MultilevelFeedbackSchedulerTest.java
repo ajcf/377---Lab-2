@@ -71,7 +71,7 @@ public class MultilevelFeedbackSchedulerTest {
   }
 
   private static void runBasicTest() {
-    System.out.println("\n### Running basic RR test ###");
+    System.out.println("\n### Running basic CPU test for MLFQ ###");
 
     // create workers to specify what the threads will do
     ThreadTask worker1 = new ThreadTask(1, false);
@@ -114,23 +114,25 @@ public class MultilevelFeedbackSchedulerTest {
     thread2.join();
     thread3.join();
 
-    System.out.println("\n### Basic RR test finished ###\n");
+    System.out.println("\n### Basic CPU test for MLFQ finished ###\n");
   }
 
   private static void runMixedTest() {
-    System.out.println("\n### Running mixed RR test ###");
+    System.out.println("\n### Running mixed (CPU and I/O) MLFQ test ###");
 
     // create workers to specify what the threads will do
     ThreadTask worker1 = new ThreadTask(1, false);
     ThreadTask worker2 = new ThreadTask(2, true);
     ThreadTask worker3 = new ThreadTask(3, false);
+    ThreadTask worker4 = new ThreadTask(4, true);
 
-    System.out.println("Initialized Tasks");
+    System.out.println("Initialized Tasks, 2 and 4 are I/o");
 
     // initialize the new threads to run the workers
     KThread thread1 = new KThread(worker1);
     KThread thread2 = new KThread(worker2);
     KThread thread3 = new KThread(worker3);
+    KThread thread4 = new KThread(worker4);
     
     System.out.println("Initialized Workers");
 
@@ -138,11 +140,13 @@ public class MultilevelFeedbackSchedulerTest {
     thread1.setName("t1");
     thread2.setName("t2");
     thread3.setName("t3");
+    thread4.setName("t4");
 
     // start running the threads in parallel
     thread1.fork();
     thread2.fork();
     thread3.fork();
+    thread4.fork();
 
     System.out.println("Forked Threads");
 
@@ -155,13 +159,15 @@ public class MultilevelFeedbackSchedulerTest {
     worker1.terminate();
     worker2.terminate();
     worker3.terminate();
+    worker4.terminate();
 
     // wait until all threads are finished
     thread1.join();
     thread2.join();
     thread3.join();
+    thread4.join();
 
-    System.out.println("\n### Mixed RR test finished ###\n");
+    System.out.println("\n### Mixed I/O and CPU test for MLFQ finished ###\n");
   }
 
 }

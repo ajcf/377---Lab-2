@@ -32,9 +32,9 @@ public class MultilevelFeedbackScheduler extends Scheduler {
   public boolean timerInterrupt() {
     Lib.assertTrue(Machine.interrupt().disabled());
 
-    return myQueue.timerInterrupt();
+    //return myQueue.timerInterrupt();
 
-    /*
+    
     //AGE
     //Increment all the threads that aren't being run to keep track of aging. And change the queue levels of things that are really old.
     for(int x = 0; x < RQ1.size(); x++)
@@ -65,7 +65,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       }
       else
       {
-        thread.schedulingState.setWaitingTime(thread.schedulingState.getWaitingTime() + 1 );
+        thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
       }
     }
 
@@ -124,7 +124,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
     }
 
     return true;
-  */
+  
   }
 
   /**
@@ -166,6 +166,8 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         return RQ2;
       return null;
     }
+
+    /*
     public boolean timerInterrupt() {
       Lib.assertTrue(Machine.interrupt().disabled());
 
@@ -258,6 +260,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
   
       return true;
     }
+    */
   
     /**
      * Called when a thread needs to be put into the waiting queue to acquire
