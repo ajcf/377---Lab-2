@@ -46,6 +46,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         myQueue.getQueue(1).add(thread);
         thread.schedulingState.setCurrentQueue(0);
         thread.schedulingState.setWaitingTime((Integer)0);
+        System.out.println(thread.getName() + " has been promoted.");
       }
       else
       {
@@ -62,6 +63,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         myQueue.getQueue(2).add(thread);
         thread.schedulingState.setCurrentQueue(1);
         thread.schedulingState.setWaitingTime(0);
+        System.out.println(thread.getName() + " has been promoted.");
       }
       else
       {
