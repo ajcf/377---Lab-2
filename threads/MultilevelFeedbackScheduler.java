@@ -53,7 +53,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       {
         int newWaitingTime = ((ThreadData)thread.schedulingState).getWaitingTime() + 1;
         ((ThreadData)thread.schedulingState).setWaitingTime(newWaitingTime);
-        if(thread.getName() == "t1") System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
+        System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
       }
     }
 
@@ -72,12 +72,13 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       {
         int newWaitingTime = ((int)((ThreadData)thread.schedulingState).getWaitingTime()) + 1;
         ((ThreadData)thread.schedulingState).setWaitingTime(newWaitingTime);
-        if(thread.getName() == "t1") System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
+         System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
       }
     }
 
     // timerInterrupt puts a flag down to indicate that the thread has been interrepted. 
     KThread curThread = KThread.currentThread();
+    System.out.println(curThread.getName() + " has entered demotion block");
     int timesInt = ((ThreadData)curThread.schedulingState).getTimesInterrupted();
     switch(((ThreadData)curThread.schedulingState).getCurrentQueue())
         {
@@ -95,9 +96,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         else
         {
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
-          if(curThread.getName() == "t1"){
-            System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
-          }
+          System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
           return false;
         }
       case 1:
@@ -114,9 +113,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         else
         {
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
-          if(curThread.getName() == "t1"){
-            System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
-          }
+          System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
           return false;
         }
       case 2:
@@ -198,7 +195,6 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       if(thread.schedulingState == null)
       {
         thread.schedulingState = new ThreadData();
-        //System.out.println("Created a new threaddata for thread " + thread.getName());
       }
 
       //Add the thread to a queue that is appropreate due to the fact that it is coming back from I/O
