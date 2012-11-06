@@ -9,7 +9,7 @@ public class ThreadData {
 
 	public ThreadData()
 	{
-		currentQueue = null;
+		currentQueue = 0;
 		waitingTime = 0;
 		timesInterrupted = 0;
 		iWasInterrupted = false; 
@@ -25,7 +25,7 @@ public class ThreadData {
 		currentQueue = currQ;
 	}
 
-	public int getWatingTime()
+	public int getWaitingTime()
 	{
 		return waitingTime;
 	}

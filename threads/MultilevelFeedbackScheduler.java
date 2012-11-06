@@ -10,16 +10,18 @@ import nachos.machine.Machine;
 public class MultilevelFeedbackScheduler extends Scheduler {
 
   MultilevelFeedbackQueue myQueue; 
-  LinkedList<KThread> RQ0;
-  LinkedList<KThread> RQ1;
-  LinkedList<KThread> RQ2;
+  //The three prioity levels of the scheduler.
+  //LinkedList<KThread> RQ0;
+  //LinkedList<KThread> RQ1;
+  //LinkedList<KThread> RQ2;
   /**
    * Initialize a new thread queue for managing access to the CPU using MLFQ.
    */
   @Override
   public ThreadQueue newThreadQueue(boolean transferPriority) {
     // you can ignore the transferPriority parameter for MLFQ
-    return new MultilevelFeedbackQueue();
+    myQueue = new MultilevelFeedbackQueue();
+    return myQueue;
   }
 
   /**
@@ -37,37 +39,39 @@ public class MultilevelFeedbackScheduler extends Scheduler {
     
     //AGE
     //Increment all the threads that aren't being run to keep track of aging. And change the queue levels of things that are really old.
-    for(int x = 0; x < RQ1.size(); x++)
+    for(int x = 0; x < myQueue.getQueue(1).size(); x++)
     {
-      KThread thread = RQ1.get(x);
-      if(thread.schedulingState.getWaitingTime() >= 31)
+      KThread thread = myQueue.getQueue(1).get(x);
+      if(((ThreadData)thread.schedulingState).getWaitingTime() >= 31)
       {
         myQueue.getQueue(0).remove(thread);
         myQueue.getQueue(1).add(thread);
-        thread.schedulingState.setCurrentQueue(0);
-        thread.schedulingState.setWaitingTime((Integer)0);
+        ((ThreadData)thread.schedulingState).setCurrentQueue(0);
+        ((ThreadData)thread.schedulingState).setWaitingTime((Integer)0);
         System.out.println(thread.getName() + " has been promoted.");
       }
       else
       {
-        thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
+        int newWatingTime = ((ThreadData)thread.schedulingState).getWaitingTime() + 1;
+        ((ThreadData)thread.schedulingState).setWaitingTime(newWatingTime);
       }
     }
 
-     for(int x = 0; x < RQ2.size(); x++)
+     for(int x = 0; x < myQueue.getQueue(2).size(); x++)
     {
-      KThread thread = RQ2.get(x);
-      if(thread.schedulingState.getWaitingTime() >= 31)
+      KThread thread = myQueue.getQueue(2).get(x);
+      if(((ThreadData)thread.schedulingState).getWaitingTime() >= 31)
       {
         myQueue.getQueue(1).remove(thread);
         myQueue.getQueue(2).add(thread);
-        thread.schedulingState.setCurrentQueue(1);
-        thread.schedulingState.setWaitingTime(0);
+        ((ThreadData)thread.schedulingState).setCurrentQueue(1);
+        ((ThreadData)thread.schedulingState).setWaitingTime(0);
         System.out.println(thread.getName() + " has been promoted.");
       }
       else
       {
-        thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
+        int newWatingTime = ((int)((ThreadData)thread.schedulingState).getWaitingTime()) + 1;
+        ((ThreadData)thread.schedulingState).setWaitingTime(newWatingTime);
       }
     }
 
@@ -75,54 +79,51 @@ public class MultilevelFeedbackScheduler extends Scheduler {
 
 
     KThread curThread = KThread.currentThread();
-    int timesInt = curThread.schedulingState.getTimesInterrupted();
-    switch(curThread.schedulingState.getCurrentQueue())
-    {
+    int timesInt = ((ThreadData)curThread.schedulingState).getTimesInterrupted();
+    switch(((ThreadData)curThread.schedulingState).getCurrentQueue())
+        {
       case 0:
         if(timesInt >= 1 && !curThread.isBlocked()) //then this is the second interrupt
         {
           //myQueue.getQueue(0).remove(curThread);
           //myQueue.getQueue(1).add(curThread);
-          //curThread.schedulingState.setCurrentQueue(1);
-          curThread.schedulingState.setIWasInterrupted(true);
-          curThread.schedulingState.setTimesInterrupted(0);
+          //(ThreadData)curthread.schedulingState).setCurrentQueue(1);
+          ((ThreadData)curThread.schedulingState).setIWasInterrupted(true);
+          ((ThreadData)curThread.schedulingState).setTimesInterrupted(0);
           return true;
         }
         else
         {
-          curThread.schedulingState.setTimesInterrupted(timesInt+1);
+          ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
           return false;
         }
-        break;
       case 1:
-        if(curThread.schedulingState.getTimesInterrupted() >= 3 && !curThread.isBlocked()) //then this is the fourth interrupt
+        if(((ThreadData)curThread.schedulingState).getTimesInterrupted() >= 3 && !curThread.isBlocked()) //then this is the fourth interrupt
         {
           //myQueue.getQueue(1).remove(curThread);
           //myQueue.getQueue(2).add(curThread);
-          //curThread.schedulingState.setCurrentQueue(2);
-          curThread.schedulingState.setIWasInterrupted(true);
-          curThread.schedulingState.setTimesInterrupted(0);
+          //((ThreadData)curthread.schedulingState).setCurrentQueue(2);
+          ((ThreadData)curThread.schedulingState).setIWasInterrupted(true);
+          ((ThreadData)curThread.schedulingState).setTimesInterrupted(0);
           return true;
         }
         else
         {
-          curThread.schedulingState.setTimesInterrupted(timesInt+1);
+          ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
           return false;
         }
-        break;
       case 2:
-        if(curThread.schedulingState.getTimesInterrupted() >= 7 && !curThread.isBlocked()) //then this is the eighth interrupt
+        if(((ThreadData)curThread.schedulingState).getTimesInterrupted() >= 7 && !curThread.isBlocked()) //then this is the eighth interrupt
         {
-          curThread.schedulingState.setIWasInterrupted(true);
-          curThread.schedulingState.setTimesInterrupted(0);
+          ((ThreadData)curThread.schedulingState).setIWasInterrupted(true);
+          ((ThreadData)curThread.schedulingState).setTimesInterrupted(0);
           return true;
         }
         else
         {
-          curThread.schedulingState.setTimesInterrupted(timesInt+1);
+          ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
           return false;
         }
-        break;
     }
 
     return true;
@@ -135,7 +136,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
    * CPU under MLFQ.
    */
   private static class MultilevelFeedbackQueue extends ThreadQueue {
-    PriorityQueue<LinkedList<KThread>> mlfq;
+    //PriorityQueue<LinkedList<KThread>> mlfq;
     LinkedList<KThread> RQ0;
     LinkedList<KThread> RQ1;
     LinkedList<KThread> RQ2;
@@ -146,13 +147,13 @@ public class MultilevelFeedbackScheduler extends Scheduler {
     public MultilevelFeedbackQueue() {
 
       // TODO
-      mlfq = new PriorityQueue <LinkedList<KThread>>();
+      //mlfq = new PriorityQueue <LinkedList<KThread>>();
       RQ0 = new LinkedList<KThread>();
       RQ1 = new LinkedList<KThread>();
       RQ2 = new LinkedList<KThread>();
-      mlfq.add(RQ0);
-      mlfq.add(RQ1);
-      mlfq.add(RQ2);
+      //mlfq.add(RQ0);
+      //mlfq.add(RQ1);
+      //mlfq.add(RQ2);
       int timeCounter = 0;
       //Alarm myAlarm = new Alarm();
 
@@ -178,83 +179,83 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       for(int x = 0; x < RQ1.size(); x++)
       {
         KThread thread = RQ1.get(x);
-        if(thread.schedulingState.getWaitingTime() >= 31)
+        if(((ThreadData)thread.schedulingState).getWaitingTime() >= 31)
         {
           this.getQueue(0).remove(thread);
           this.getQueue(1).add(thread);
-          thread.schedulingState.setCurrentQueue(0);
-          thread.schedulingState.setWaitingTime((Integer)0);
+          ((ThreadData)thread.schedulingState).setCurrentQueue(0);
+          ((ThreadData)thread.schedulingState).setWaitingTime((Integer)0);
         }
         else
         {
-          thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
+          ((ThreadData)thread.schedulingState).setWaitingTime((int)((ThreadData)thread.schedulingState).getWaitingTime() + 1 );
         }
       }
   
        for(int x = 0; x < RQ2.size(); x++)
       {
         KThread thread = RQ2.get(x);
-        if(thread.schedulingState.getWaitingTime() >= 31)
+        if(((ThreadData)thread.schedulingState).getWaitingTime() >= 31)
       {
           this.getQueue(1).remove(thread);
           this.getQueue(2).add(thread);
-          thread.schedulingState.setCurrentQueue(1);
-          thread.schedulingState.setWaitingTime(0);
+          ((ThreadData)thread.schedulingState).setCurrentQueue(1);
+          ((ThreadData)thread.schedulingState).setWaitingTime(0);
         }
         else
         {
-          thread.schedulingState.setWaitingTime((int)thread.schedulingState.getWaitingTime() + 1 );
+          ((ThreadData)thread.schedulingState).setWaitingTime((int)((ThreadData)thread.schedulingState).getWaitingTime() + 1 );
         }
       }
   
       // timerInterrupt puts a flag down to indicate that the thread has been interrepted. 
 
       KThread curThread = KThread.currentThread();
-      int timesInt = curThread.schedulingState.getTimesInterrupted();
-      switch(curThread.schedulingState.getCurrentQueue())
+      int timesInt = (ThreadData)curthread.schedulingState).getTimesInterrupted();
+      switch((ThreadData)curthread.schedulingState).getCurrentQueue())
       {
         case 0:
           if(timesInt >= 1 && !curThread.isBlocked()) //then this is the second interrupt
           {
             //myQueue.getQueue(0).remove(curThread);
             //myQueue.getQueue(1).add(curThread);
-            //curThread.schedulingState.setCurrentQueue(1);
-            curThread.schedulingState.setIWasInterrupted(true);
-            curThread.schedulingState.setTimesInterrupted(0);
+            //(ThreadData)curthread.schedulingState).setCurrentQueue(1);
+            (ThreadData)curthread.schedulingState).setIWasInterrupted(true);
+            (ThreadData)curthread.schedulingState).setTimesInterrupted(0);
             return true;
           }
           else
           {
-            curThread.schedulingState.setTimesInterrupted(timesInt+1);
+            (ThreadData)curthread.schedulingState).setTimesInterrupted(timesInt+1);
             return false;
           }
           break;
         case 1:
-          if(curThread.schedulingState.getTimesInterrupted() >= 3 && !curThread.isBlocked()) //then this is the fourth interrupt
+          if((ThreadData)curthread.schedulingState).getTimesInterrupted() >= 3 && !curThread.isBlocked()) //then this is the fourth interrupt
           {
             //myQueue.getQueue(1).remove(curThread);
             //myQueue.getQueue(2).add(curThread);
-            //curThread.schedulingState.setCurrentQueue(2);
-            curThread.schedulingState.setIWasInterrupted(true);
-            curThread.schedulingState.setTimesInterrupted(0);
+            //(ThreadData)curthread.schedulingState).setCurrentQueue(2);
+            (ThreadData)curthread.schedulingState).setIWasInterrupted(true);
+            (ThreadData)curthread.schedulingState).setTimesInterrupted(0);
             return true;
           }
           else
           {
-            curThread.schedulingState.setTimesInterrupted(timesInt+1);
+            (ThreadData)curthread.schedulingState).setTimesInterrupted(timesInt+1);
             return false;
           }
           break;
         case 2:
-          if(curThread.schedulingState.getTimesInterrupted() >= 7 && !curThread.isBlocked()) //then this is the eighth interrupt
+          if((ThreadData)curthread.schedulingState).getTimesInterrupted() >= 7 && !curThread.isBlocked()) //then this is the eighth interrupt
           {
-            curThread.schedulingState.setIWasInterrupted(true);
-            curThread.schedulingState.setTimesInterrupted(0);
+            (ThreadData)curthread.schedulingState).setIWasInterrupted(true);
+            (ThreadData)curthread.schedulingState).setTimesInterrupted(0);
             return true;
           }
           else
           {
-            curThread.schedulingState.setTimesInterrupted(timesInt+1);
+            (ThreadData)curthread.schedulingState).setTimesInterrupted(timesInt+1);
             return false;
           }
           break;
@@ -289,7 +290,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
 
       //Add the thread to a queue that is appropreate due to the fact that it is coming back from I/O
       // or when it is a new thread being created, so always go into a higher priority queue. 
-      Integer curQueue = thread.schedulingState.getCurrentQueue();
+      Integer curQueue = ((ThreadData)thread.schedulingState).getCurrentQueue();
       switch(curQueue)
       {
         case 0:
@@ -297,17 +298,17 @@ public class MultilevelFeedbackScheduler extends Scheduler {
             System.out.println("Placed thread " + thread.getName() + " in RQ0");
         break;
         case 1:
-            thread.schedulingState.setCurrentQueue((Integer)0); 
+            ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)0); 
             System.out.println("Placed thread " + thread.getName() + " in RQ0");
             RQ0.add(thread);
         break;
         case 2:
-            thread.schedulingState.setCurrentQueue((Integer)1);
+            ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)1);
             System.out.println("Placed thread " + thread.getName() + " in RQ0");
             RQ1.add(thread);
         break;
         default: 
-          thread.schedulingState.setCurrentQueue((Integer)0); 
+          ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)0); 
           System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
           RQ0.add(thread);
           break;
@@ -342,8 +343,8 @@ public class MultilevelFeedbackScheduler extends Scheduler {
      
       if(next != null)
       {
-        next.schedulingState.setWaitingTime(0);
-        next.schedulingState.setTimesInterrupted(0);
+        ((ThreadData)next.schedulingState).setWaitingTime(0);
+        ((ThreadData)next.schedulingState).setTimesInterrupted(0);
       }
       // TODO
       return next;

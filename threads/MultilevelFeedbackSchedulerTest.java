@@ -71,7 +71,7 @@ public class MultilevelFeedbackSchedulerTest {
   }
 
   private static void runBasicTest() {
-    System.out.println("\n### Running basic CPU test for MLFQ ###");
+    System.out.println("\n### CPU test for MLFQ ###");
 
     // create workers to specify what the threads will do
     ThreadTask worker1 = new ThreadTask(1, false);
