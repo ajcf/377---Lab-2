@@ -35,7 +35,6 @@ public class MultilevelFeedbackScheduler extends Scheduler {
     Lib.assertTrue(Machine.interrupt().disabled());
 
     //return myQueue.timerInterrupt();
-
     //AGE
     //Increment all the threads that aren't being run to keep track of aging. And change the queue levels of things that are really old.
     for(int x = 0; x < myQueue.getQueue(1).size(); x++)
@@ -47,13 +46,13 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         myQueue.getQueue(1).add(thread);
         ((ThreadData)thread.schedulingState).setCurrentQueue(0);
         ((ThreadData)thread.schedulingState).setWaitingTime((Integer)0);
-        System.out.println(thread.getName() + " has been promoted.");
+        //System.out.println(thread.getName() + " has been promoted from RQ1.");
       }
       else
       {
         int newWaitingTime = ((ThreadData)thread.schedulingState).getWaitingTime() + 1;
         ((ThreadData)thread.schedulingState).setWaitingTime(newWaitingTime);
-        System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
+        //System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
       }
     }
 
@@ -66,19 +65,20 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         myQueue.getQueue(2).add(thread);
         ((ThreadData)thread.schedulingState).setCurrentQueue(1);
         ((ThreadData)thread.schedulingState).setWaitingTime(0);
-        //System.out.println(thread.getName() + " has been promoted.");
+        //System.out.println(thread.getName() + " has been promoted from RQ2.");
       }
       else
       {
         int newWaitingTime = ((int)((ThreadData)thread.schedulingState).getWaitingTime()) + 1;
         ((ThreadData)thread.schedulingState).setWaitingTime(newWaitingTime);
-         System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
+         //System.out.println("Incremented waiting time of " + thread.getName() + " to " + newWaitingTime);
       }
     }
-
+    
+  
     // timerInterrupt puts a flag down to indicate that the thread has been interrepted. 
     KThread curThread = KThread.currentThread();
-    System.out.println(curThread.getName() + " has entered demotion block");
+    System.out.println("\n Thread in timerInterrupt(): " + curThread.getName() + "\n");
     int timesInt = ((ThreadData)curThread.schedulingState).getTimesInterrupted();
     switch(((ThreadData)curThread.schedulingState).getCurrentQueue())
         {
@@ -90,13 +90,13 @@ public class MultilevelFeedbackScheduler extends Scheduler {
           ((ThreadData)curThread.schedulingState).setCurrentQueue(1);
           ((ThreadData)curThread.schedulingState).setIWasInterrupted(true);
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(0);
-          System.out.println("Thread " + curThread.getName() + " should be demoted to RQ1");
+          //System.out.println("Thread " + curThread.getName() + " should be demoted to RQ1");
           return true;
         }
         else
         {
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
-          System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
+          //System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
           return false;
         }
       case 1:
@@ -107,13 +107,13 @@ public class MultilevelFeedbackScheduler extends Scheduler {
           ((ThreadData)curThread.schedulingState).setCurrentQueue(2);
           ((ThreadData)curThread.schedulingState).setIWasInterrupted(true);
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(0);
-          System.out.println("Thread " + curThread.getName() + " should be demoted to RQ2");
+          //System.out.println("Thread " + curThread.getName() + " should be demoted to RQ2");
           return true;
         }
         else
         {
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
-          System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
+          //System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
           return false;
         }
       case 2:
@@ -126,7 +126,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
         else
         {
           ((ThreadData)curThread.schedulingState).setTimesInterrupted(timesInt+1);
-          System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
+          //System.out.println(curThread.getName() + " has been interrupted " + (timesInt+1) + " times.");
           return false;
         }
     }
@@ -186,7 +186,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
     public void waitForAccess(KThread thread) {
 
 
-      System.out.println("Added thread " + thread.getName() + " to ready queue");
+      //System.out.println("Added thread " + thread.getName() + " to ready queue");
       //Will only be called when the thread is coming back from I/O or is just being created. 
 
       Lib.assertTrue(Machine.interrupt().disabled());
@@ -203,7 +203,7 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       if(curQueue == null)
       {
         ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)0); 
-          System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
+          //System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
           RQ0.add(thread);
       }
       else{
@@ -211,21 +211,21 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       {
         case 0:
             RQ0.add(thread);
-            System.out.println("Placed thread " + thread.getName() + " in RQ0");
+            //System.out.println("Placed thread " + thread.getName() + " in RQ0");
         break;
         case 1:
             ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)1); 
-            System.out.println("Placed thread " + thread.getName() + " in RQ1");
-            RQ0.add(thread);
+            //System.out.println("Placed thread " + thread.getName() + " in RQ1");
+            RQ1.add(thread);
         break;
         case 2:
             ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)2);
-            System.out.println("Placed thread " + thread.getName() + " in RQ2");
+            //System.out.println("Placed thread " + thread.getName() + " in RQ2");
             RQ1.add(thread);
         break;
         default: 
           ((ThreadData)thread.schedulingState).setCurrentQueue((Integer)0); 
-          System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
+          //System.out.println("Placed thread " + thread.getName() + " in RQ0, since it's a new thread.");
           RQ0.add(thread);
           break;
       }
@@ -244,20 +244,18 @@ public class MultilevelFeedbackScheduler extends Scheduler {
     @Override
     public KThread nextThread() {
       Lib.assertTrue(Machine.interrupt().disabled());
+      
       KThread next = null;
       if(!RQ0.isEmpty())
       {
-        //System.out.println("Next thread is from RQ0!");
         next = RQ0.pop();
       }     
       else if(!RQ1.isEmpty())
       {
-        //System.out.println("Next thread is from RQ1!");
         next = RQ1.pop();
       }
       else if(!RQ2.isEmpty())
       {
-        //System.out.println("Next thread is from RQ2!");
         next = RQ2.pop();
       }
      
@@ -265,7 +263,6 @@ public class MultilevelFeedbackScheduler extends Scheduler {
       {
         ((ThreadData)next.schedulingState).setWaitingTime(0);
         ((ThreadData)next.schedulingState).setTimesInterrupted(0);
-        if(KThread.currentThread().getName() == "t1") System.out.println("Reset waiting time of " + KThread.currentThread().getName());
       }
       // TODO
       return next;

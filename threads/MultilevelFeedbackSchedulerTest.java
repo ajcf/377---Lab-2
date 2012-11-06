@@ -11,15 +11,15 @@ public class MultilevelFeedbackSchedulerTest {
     System.out.println("#########################");
 
     /* Run a simple test of the scheduler */
-    //runBasicTest();
+    runBasicTest();
 
     /* Run a test with mixed CPU and I/O simulation */
-    //runMixedTest();
+    runMixedTest();
 
     /* Run The aging Test to see if Aging Works */
     runAgingTest();
 
-    //runDemotionTest();
+    runDemotionTest();
 
     /* Run any other tests */
     // runComplexTest();
@@ -61,7 +61,7 @@ public class MultilevelFeedbackSchedulerTest {
 
         if (io) { // simulate I/O job
           // do I/O lasting 200 ticks
-          long ioTime = 600;
+          long ioTime = 200;
           // this blocks the thread until ioTime has passed
           ThreadedKernel.alarm.waitUntil(ioTime);
           System.out.print("i" + id);
@@ -329,7 +329,7 @@ public class MultilevelFeedbackSchedulerTest {
     System.out.println("Forked Threads");
 
     // let the threads run for 5000 ticks
-    ThreadedKernel.alarm.waitUntil(10000);
+    ThreadedKernel.alarm.waitUntil(5000);
 
     System.out.println("Alarm Rang");
 
