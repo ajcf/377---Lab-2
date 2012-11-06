@@ -1,5 +1,6 @@
 package nachos.threads;
 
+import nachos.machine.Lib;
 import nachos.machine.Machine;
 
 public class MultilevelFeedbackSchedulerTest {
@@ -10,10 +11,15 @@ public class MultilevelFeedbackSchedulerTest {
     System.out.println("#########################");
 
     /* Run a simple test of the scheduler */
-    runBasicTest();
+    //runBasicTest();
 
     /* Run a test with mixed CPU and I/O simulation */
-    runMixedTest();
+    //runMixedTest();
+
+    /* Run The aging Test to see if Aging Works */
+    runAgingTest();
+
+    //runDemotionTest();
 
     /* Run any other tests */
     // runComplexTest();
@@ -184,7 +190,7 @@ public class MultilevelFeedbackSchedulerTest {
     ThreadTask worker8 = new ThreadTask(8, true);
     ThreadTask worker9 = new ThreadTask(9, true);
     ThreadTask worker10 = new ThreadTask(10, true);
-    ThreadTask worker11 = new ThreadTask(11, true);
+    /*ThreadTask worker11 = new ThreadTask(11, true);
     ThreadTask worker12 = new ThreadTask(12, true);
     ThreadTask worker13 = new ThreadTask(13, true);
     ThreadTask worker14 = new ThreadTask(14, true);
@@ -207,7 +213,7 @@ public class MultilevelFeedbackSchedulerTest {
     ThreadTask worker31 = new ThreadTask(31, true);
     ThreadTask worker32 = new ThreadTask(32, true);
     ThreadTask worker33 = new ThreadTask(33, true);
-
+*/
     System.out.println("Initialized Tasks, 1 is CPU and 2-33 are I/O");
 
     // initialize the new threads to run the workers
@@ -221,7 +227,7 @@ public class MultilevelFeedbackSchedulerTest {
     KThread thread8 = new KThread(worker8);
     KThread thread9 = new KThread(worker9);
     KThread thread10 = new KThread(worker10);
-    KThread thread11 = new KThread(worker11);
+    /*KThread thread11 = new KThread(worker11);
     KThread thread12 = new KThread(worker12);
     KThread thread13 = new KThread(worker13);
     KThread thread14 = new KThread(worker14);
@@ -244,7 +250,7 @@ public class MultilevelFeedbackSchedulerTest {
     KThread thread31 = new KThread(worker31); 
     KThread thread32 = new KThread(worker32); 
     KThread thread33 = new KThread(worker33); 
-
+*/
     System.out.println("Initialized Workers");
 
     // name the threads for debugging and identification
@@ -258,7 +264,7 @@ public class MultilevelFeedbackSchedulerTest {
     thread8.setName("t8");
     thread9.setName("t9");
     thread10.setName("t10");
-    thread11.setName("t11");
+    /*thread11.setName("t11");
     thread12.setName("t12");
     thread13.setName("t13");
     thread14.setName("t14");
@@ -281,7 +287,7 @@ public class MultilevelFeedbackSchedulerTest {
     thread31.setName("t31");
     thread32.setName("t32");
     thread33.setName("t33");
-
+*/
     System.out.println("Named Threads");
 
     // start running the threads in parallel
@@ -295,7 +301,7 @@ public class MultilevelFeedbackSchedulerTest {
     thread8.fork();
     thread9.fork();
     thread10.fork();
-    thread11.fork();
+    /*thread11.fork();
     thread12.fork();
     thread13.fork();
     thread14.fork();
@@ -318,12 +324,12 @@ public class MultilevelFeedbackSchedulerTest {
     thread31.fork();
     thread32.fork();
     thread33.fork();
-
+*/
 
     System.out.println("Forked Threads");
 
     // let the threads run for 5000 ticks
-    ThreadedKernel.alarm.waitUntil(5000);
+    ThreadedKernel.alarm.waitUntil(10000);
 
     System.out.println("Alarm Rang");
 
@@ -338,7 +344,7 @@ public class MultilevelFeedbackSchedulerTest {
     worker8.terminate();
     worker9.terminate();
     worker10.terminate();
-    worker11.terminate();
+    /*worker11.terminate();
     worker12.terminate();
     worker13.terminate();
     worker14.terminate();
@@ -361,7 +367,7 @@ public class MultilevelFeedbackSchedulerTest {
     worker31.terminate();
     worker32.terminate();
     worker33.terminate();
-
+*/
     // wait until all threads are finished
     thread1.join();
     thread2.join();
@@ -373,7 +379,7 @@ public class MultilevelFeedbackSchedulerTest {
     thread8.join();
     thread9.join();
     thread10.join();
-    thread11.join();
+    /*thread11.join();
     thread12.join();
     thread13.join();
     thread14.join();
@@ -396,12 +402,45 @@ public class MultilevelFeedbackSchedulerTest {
     thread31.join();
     thread32.join();
     thread33.join();
-
+*/
     System.out.println("Thread 1 should have been promoted from RQ2. IF so, test passes!");
 
 
     System.out.println("\n### Mixed I/O and CPU test for MLFQ finished ###\n");
 
+  }
+
+    private static void runDemotionTest() {
+    System.out.println("\n### Demotion test for MLFQ ###");
+
+    // create workers to specify what the threads will do
+    ThreadTask worker1 = new ThreadTask(1, false);
+
+    // initialize the new threads to run the workers
+    KThread thread1 = new KThread(worker1);
+
+    // name the threads for debugging and identification
+    thread1.setName("t1");
+
+    // start running the threads in parallel
+    thread1.fork();
+
+    // let the threads run for 5000 ticks
+    ThreadedKernel.alarm.waitUntil(5000);
+
+    // signal the threads to exit
+    worker1.terminate();
+
+    // wait until all threads are finished
+    thread1.join();
+
+    if(((ThreadData)thread1.schedulingState).getCurrentQueue() == (Integer)2){
+        System.out.println("Demotion Test PASSED");
+    } else {
+        System.out.println("Demotion Test FAILED");
+    }
+
+    System.out.println("\n### Basic Demotion test for MLFQ finished ###\n");
   }
 
 }
